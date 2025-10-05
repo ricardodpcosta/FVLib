@@ -1,0 +1,758 @@
+#!/bin/bash
+# _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+#|  _ _ _   _   _   _      |                                   |
+#| |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+#| |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+#| |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+#| |_|       \_/   |_|_|_| |  Release: January, 2022           |
+#|_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+# About: library management utility
+# Modification: July, 2023
+#----------------------------------------------------------------------------------------
+# functions
+#----------------------------------------------------------------------------------------
+# display the help message
+function fvl_make_help {
+      printf "%s" "[FVL] About: library management utility.
+[FVL] Usage: fvl-make [options]
+[FVL] Options:
+[FVL]        -h|--help         < >               Display the help message.
+[FVL]        -v|--version      < >               Display library version.
+[FVL]        -a|--all          < >               Install library and applications.
+[FVL]        -l|--library      < >               Compile library source code.
+[FVL]        -t|--tools        < >               Build tool application binaries.
+[FVL]        -s|--solvers      < >               Build solver application binaries.
+[FVL]        -u|--update       < >               Update modified library and application files.
+[FVL]        -m|--make         < >               Generate a makefile for library and applications.
+[FVL]        -o|--object       <file>            Create object file from specific source file <file>.
+[FVL]        -e|--executable   <file>            Create executable from specific source file <file>.
+[FVL]        -p|--production   < >               Enable production mode (default).
+[FVL]        -d|--debugging    < >               Enable debugging mode.
+[FVL]        -r|--profiling    < >               Enable profiling mode.
+[FVL]        -c|--clean        < >               Clean objects and binaries.
+[FVL]        -x|--trace        < >               Trace executed commands.
+";
+}
+# compile library source
+function fvl_make_library {
+      # check if directory exists
+      if [[ ! -f $FVL_INC_PATH ]];then
+            mkdir -p $FVL_INC_PATH;
+      fi;
+      # check if directory exists
+      if [[ ! -f $FVL_LIB_PATH ]];then
+            mkdir -p $FVL_LIB_PATH;
+      fi;
+      # check if file exists
+      for file in ${FVL_SRC_FILES[@]};do
+            if [[ ! -f $FVL_SRC_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+      # compile modules
+      num_files=${#FVL_SRC_FILES[@]};
+      num_lines=0;
+      # count total number of lines
+      for file in ${FVL_SRC_FILES[@]};do
+            file=$FVL_SRC_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            num_lines=$(($num_lines + $aux));
+      done;
+      count=0;
+      for file in ${FVL_SRC_FILES[@]};do
+            file=$FVL_SRC_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            count=$(($count + $aux));
+            file_name=$(basename $file);
+            printf "%s %*s %5s %15s\n" "[FVL] Compiling file $file_name..." $((50 - ${#file_name})) "" "$(($count*100/$num_lines))%" "($count/$num_lines)";
+            $FVL_CMP $FVL_SRC_FLAGS -c $file -o $FVL_INC_PATH/${file_name%.*}.o;
+      done;
+      # make library
+      if [[ $count != 0 ]];then
+            # make the archive
+            echo "[FVL] Making archive for library...";
+            $FVL_AR -u -r -c $FVL_LIB_PATH/libfvl.a $FVL_INC_PATH/fvl_*.o;
+            # generate index to archive
+            echo "[FVL] Generating index to archive...";
+            $FVL_RANLIB $FVL_LIB_PATH/libfvl.a;
+      fi;
+}
+# build tool application binaries
+function fvl_make_tools {
+      # check if directory exists
+      if [[ ! -f $FVL_INC_PATH ]];then
+            mkdir -p $FVL_INC_PATH;
+      fi;
+      # check if directory exists
+      if [[ ! -f $FVL_BIN_PATH ]];then
+            mkdir -p $FVL_BIN_PATH;
+      fi;
+      # check if file exists
+      for file in ${FVL_TOOLS_FILES[@]};do
+            if [[ ! -f $FVL_TOOLS_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+      # compile tests
+      num_files=${#FVL_TOOLS_FILES[@]};
+      num_lines=0;
+      # count total number of lines
+      for file in ${FVL_TOOLS_FILES[@]};do
+            file=$FVL_TOOLS_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            num_lines=$(($num_lines + $aux));
+      done;
+      count=0;
+      for file in ${FVL_TOOLS_FILES[@]};do
+            file=$FVL_TOOLS_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            count=$(($count + $aux));
+            file_name=$(basename $file);
+            printf "%s %*s %5s %15s\n" "[FVL] Compiling file $file_name..." $((50 - ${#file_name})) "" "$(($count*100/$num_lines))%" "($count/$num_lines)";
+            $FVL_CMP $FVL_SRC_FLAGS -c $file -o $FVL_INC_PATH/${file_name%.*}.o;
+            $FVL_CMP $FVL_TOOLS_FLAGS $FVL_INC_PATH/${file_name%.*}.o -o $FVL_BIN_PATH/${file_name%.*} $FVL_LIB_FLAGS;
+      done;
+}
+# build solver application binaries
+function fvl_make_solvers {
+      # check if directory exists
+      if [[ ! -f $FVL_INC_PATH ]];then
+            mkdir -p $FVL_INC_PATH;
+      fi;
+      # check if directory exists
+      if [[ ! -f $FVL_BIN_PATH ]];then
+            mkdir -p $FVL_BIN_PATH;
+      fi;
+      # check if file exists
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            if [[ ! -f $FVL_SOLVERS_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+      # compile tests
+      num_files=${#FVL_SOLVERS_FILES[@]};
+      num_lines=0;
+      # count total number of lines
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            file=$FVL_SOLVERS_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            num_lines=$(($num_lines + $aux));
+      done;
+      count=0;
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            file=$FVL_SOLVERS_PATH/$file;
+            aux=$(wc -l $file | awk '{print $1}');
+            count=$(($count + $aux));
+            file_name=$(basename $file);
+            printf "%s %*s %5s %15s\n" "[FVL] Compiling file $file_name..." $((50 - ${#file_name})) "" "$(($count*100/$num_lines))%" "($count/$num_lines)";
+            $FVL_CMP $FVL_SRC_FLAGS -c $file -o $FVL_INC_PATH/${file_name%.*}.o;
+            $FVL_CMP $FVL_SOLVERS_FLAGS $FVL_INC_PATH/${file_name%.*}.o -o $FVL_BIN_PATH/${file_name%.*} $FVL_LIB_FLAGS;
+      done;
+}
+# update library and applications
+function fvl_make_update {
+      # check modified library
+      count=0;
+      found=0;
+      aux=();
+      for file in ${FVL_SRC_FILES[@]};do
+            file=$FVL_SRC_PATH/$file;
+            file_name=$(basename $file);
+            obj=$FVL_INC_PATH/${file_name%.*}.o;
+            # check if file exists
+            if [[ ! -f $file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+            # check if object exists
+            if [[ $found == 1 || ! -f $obj ]];then
+                  aux[count]=${file#$FVL_SRC_PATH/};
+                  count=$((count + 1));
+                  found=1;
+            else
+                  # compare dates
+                  if [[ $(uname -a) == *"Linux"* ]];then
+                        date_src=$(stat -c %Y $file);
+                        date_obj=$(stat -c %Y $obj);
+                  elif [[ $(uname -a) == *"Darwin"* ]];then
+                        date_src=$(stat -f%c $file);
+                        date_obj=$(stat -f%c $obj);
+                  fi;
+                  if [[ $date_src -ge $date_obj ]];then
+                        aux[count]=${file#$FVL_SRC_PATH/};
+                        count=$((count + 1));
+                        found=1;
+                  fi;
+            fi;
+      done;
+      # copy modified files
+      FVL_SRC_FILES=();
+      if [[ $count -gt 0 ]];then
+            FVL_SRC_FILES=${aux[@]};
+      fi;
+      # check modified tools
+      if [[ ${#FVL_SRC_FILES[@]} == 0 ]];then
+            count=0;
+            aux=();
+            for file in ${FVL_TOOLS_FILES[@]};do
+                  file=$FVL_TOOLS_PATH/$file;
+                  file_name=$(basename $file);
+                  obj=$FVL_INC_PATH/${file_name%.*}.o;
+                  # check if file exists
+                  if [[ ! -f $file ]];then
+                        echo "[FVL] ERROR: File $file not found!";
+                        exit;
+                  fi;
+                  # check if object exists
+                  if [[ ! -f $obj ]];then
+                        aux[count]=${file#$FVL_TOOLS_PATH/};
+                        count=$((count + 1));
+                  else
+                        # compare dates
+                        if [[ $(uname -a) == *"Linux"* ]];then
+                              date_src=$(stat -c %Y $file);
+                              date_obj=$(stat -c %Y $obj);
+                        elif [[ $(uname -a) == *"Darwin"* ]];then
+                              date_src=$(stat -f%c $file);
+                              date_obj=$(stat -f%c $obj);
+                        fi;
+                        if [[ $date_src -ge $date_obj ]];then
+                              aux[count]=${file#$FVL_TOOLS_PATH/};
+                              count=$((count + 1));
+                        fi;
+                  fi;
+            done;
+            # copy modified files
+            FVL_TOOLS_FILES=();
+            if [[ $count -gt 0 ]];then
+                  FVL_TOOLS_FILES=${aux[@]};
+            fi;
+      fi;
+      # check modified solvers
+      if [[ ${#FVL_SRC_FILES[@]} == 0 ]];then
+            count=0;
+            aux=();
+            for file in ${FVL_SOLVERS_FILES[@]};do
+                  file=$FVL_SOLVERS_PATH/$file;
+                  file_name=$(basename $file);
+                  obj=$FVL_INC_PATH/${file_name%.*}.o;
+                  # check if file exists
+                  if [[ ! -f $file ]];then
+                        echo "[FVL] ERROR: File $file not found!";
+                        exit;
+                  fi;
+                  # check if object exists
+                  if [[ ! -f $obj ]];then
+                        aux[count]=${file#$FVL_SOLVERS_PATH/};
+                        count=$((count + 1));
+                  else
+                        # compare dates
+                        if [[ $(uname -a) == *"Linux"* ]];then
+                              date_src=$(stat -c %Y $file);
+                              date_obj=$(stat -c %Y $obj);
+                        elif [[ $(uname -a) == *"Darwin"* ]];then
+                              date_src=$(stat -f%c $file);
+                              date_obj=$(stat -f%c $obj);
+                        fi;
+                        if [[ $date_src -ge $date_obj ]];then
+                              aux[count]=${file#$FVL_SOLVERS_PATH/};
+                              count=$((count + 1));
+                        fi;
+                  fi;
+            done;
+            # copy modified files
+            FVL_SOLVERS_FILES=();
+            if [[ $count -gt 0 ]];then
+                  FVL_SOLVERS_FILES=${aux[@]};
+            fi;
+      fi;
+}
+# generate a makefile for library and applications
+function  fvl_make_make {
+      # check if directory exists
+      if [[ ! -f $FVL_INC_PATH ]];then
+            mkdir -p $FVL_INC_PATH;
+      fi;
+      # check if directory exists
+      if [[ ! -f $FVL_LIB_PATH ]];then
+            mkdir -p $FVL_LIB_PATH;
+      fi;
+      # check if directory exists
+      if [[ ! -f $FVL_BIN_PATH ]];then
+            mkdir -p $FVL_BIN_PATH;
+      fi;
+      # check if file exists
+      for file in ${FVL_SRC_FILES[@]};do
+            if [[ ! -f $FVL_SRC_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+      # check if file exists
+      for file in ${FVL_TOOLS_FILES[@]};do
+            if [[ ! -f $FVL_TOOLS_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+      # check if file exists
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            if [[ ! -f $FVL_SOLVERS_PATH/$file ]];then
+                  echo "[FVL] ERROR: File $file not found!";
+                  exit;
+            fi;
+      done;
+
+      # create makefile
+      makefile=$FVL_BUILD_PATH/Makefile;
+      echo "# Automatically generated Makefile for FVLib" > $makefile;
+      echo "" >> $makefile;
+      # write variables
+      echo "FVL_SRC_PATH=${FVL_SRC_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_TOOLS_PATH=${FVL_TOOLS_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_SOLVERS_PATH=${FVL_SOLVERS_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_INC_PATH=${FVL_INC_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_LIB_PATH=${FVL_LIB_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_BIN_PATH=${FVL_BIN_PATH//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_CMP=${FVL_CMP//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_AR=${FVL_AR//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_RANLIB=${FVL_RANLIB//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_SRC_FLAGS=${FVL_SRC_FLAGS//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_TOOLS_FLAGS=${FVL_TOOLS_FLAGS//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_SOLVERS_FLAGS=${FVL_SOLVERS_FLAGS//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo "FVL_LIB_FLAGS=${FVL_LIB_FLAGS//[$'\t\r\n']}" | tr -s " " >> $makefile;
+      echo ""  >> $makefile;
+      # write all target
+      echo "all: library tools solvers" >> $makefile;
+      echo ""  >> $makefile;
+      # write library target
+      echo -e "library: \$(FVL_LIB_PATH)/libfvl.a" >> $makefile;
+      echo ""  >> $makefile;
+      echo -e "\$(FVL_LIB_PATH)/libfvl.a: \$(FVL_INC_PATH)/fvl_lib1d.o \$(FVL_INC_PATH)/fvl_lib2d.o \$(FVL_INC_PATH)/fvl_lib3d.o \$(FVL_INC_PATH)/fvl_lib.o" >> $makefile;
+      echo -e "\techo \"[FVL] Making archive for library...\"" >> $makefile;
+      echo -e "\t\$(FVL_AR) -u -r -c \$(FVL_LIB_PATH)/libfvl.a \$(FVL_INC_PATH)/fvl_*.o" >> $makefile;
+      echo -e "\techo \"[FVL] Generating index to archive...\"" >> $makefile;
+      echo -e "\t\$(FVL_RANLIB) \$(FVL_LIB_PATH)/libfvl.a" >> $makefile;
+      echo ""  >> $makefile;
+      # write library source targets
+      for file in ${FVL_SRC_FILES[@]};do
+            file=$FVL_SRC_PATH/$file;
+            file_name=$(basename $file);
+            obj=${file_name%.*}.o;
+            target="\$(FVL_INC_PATH)/${obj}: \$(FVL_SRC_PATH)/${file#$FVL_SRC_PATH/}";
+            # match use at the begining of the line
+            deps=($(grep "^\s*use\s" $file));
+            for dep in ${deps[@]};do
+                  # filter source files
+                  if [[ $dep == *"fvl"* ]];then
+                        dep=${dep#*fvl};
+                        dep=${dep% *};
+                        dep=${dep%:*};
+                        dep="fvl${dep}";
+                        if [[ $dep != "" ]];then
+                              target="${target} \$(FVL_INC_PATH)/${dep}.o";
+                        fi;
+                  fi;
+            done;
+            echo $target >> $makefile;
+            echo -e "\techo \"[FVL] Compiling file ${file_name}...\"" >> $makefile;
+            echo -e "\t\$(FVL_CMP) \$(FVL_SRC_FLAGS) -c \$(FVL_SRC_PATH)/${file#$FVL_SRC_PATH/} -o \$(FVL_INC_PATH)/${obj}" >> $makefile;
+            echo "" >> $makefile;
+      done;
+      # write tools target
+      target="tools:";
+      for file in ${FVL_TOOLS_FILES[@]};do
+            file=$FVL_TOOLS_PATH/$file;
+            file_name=$(basename $file);
+            obj=${file_name%.*}.o;
+            target="${target} \$(FVL_INC_PATH)/${obj}";
+      done;
+      echo $target >> $makefile;
+      echo ""  >> $makefile;
+      # write tools source targets
+      for file in ${FVL_TOOLS_FILES[@]};do
+            file=$FVL_TOOLS_PATH/$file;
+            file_name=$(basename $file);
+            obj=${file_name%.*}.o;
+            target="\$(FVL_INC_PATH)/${obj}: \$(FVL_TOOLS_PATH)/${file#$FVL_TOOLS_PATH/}";
+            # match use at the begining of the line
+            deps=($(grep "^\s*use\s" $file));
+            for dep in ${deps[@]};do
+                  # filter source files
+                  if [[ $dep == *"fvl"* ]];then
+                        dep=${dep#*fvl};
+                        dep=${dep% *};
+                        dep=${dep%:*};
+                        dep="fvl${dep}";
+                        if [[ $dep != "" ]];then
+                              target="${target} \$(FVL_INC_PATH)/${dep}.o";
+                        fi;
+                  fi;
+            done;
+            target="${target} \$(FVL_LIB_PATH)/libfvl.a";
+            echo $target >> $makefile;
+            echo -e "\techo \"[FVL] Compiling file ${file_name}...\"" >> $makefile;
+            echo -e "\t\$(FVL_CMP) \$(FVL_SRC_FLAGS) -c \$(FVL_TOOLS_PATH)/${file#$FVL_TOOLS_PATH/} -o \$(FVL_INC_PATH)/${obj}" >> $makefile;
+            echo -e "\t\$(FVL_CMP) \$(FVL_TOOLS_FLAGS) \$(FVL_INC_PATH)/${obj} -o \$(FVL_BIN_PATH)/${file_name%.*} \$(FVL_LIB_FLAGS)" >> $makefile;
+            echo "" >> $makefile;
+      done;
+      # write solvers target
+      target="solvers:"
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            file=$FVL_SOLVERS_PATH/$file;
+            file_name=$(basename $file);
+            obj=${file_name%.*}.o;
+            target="${target} \$(FVL_INC_PATH)/${obj}";
+      done;
+      echo $target >> $makefile;
+      echo ""  >> $makefile;
+      # write solvers source targets
+      for file in ${FVL_SOLVERS_FILES[@]};do
+            file=$FVL_SOLVERS_PATH/$file;
+            file_name=$(basename $file);
+            obj=${file_name%.*}.o;
+            target="\$(FVL_INC_PATH)/${obj}: \$(FVL_SOLVERS_PATH)/${file#$FVL_SOLVERS_PATH/}";
+            # match use at the begining of the line
+            deps=($(grep "^\s*use\s" $file));
+            for dep in ${deps[@]};do
+                  # filter source files
+                  if [[ $dep == *"fvl"* ]];then
+                        dep=${dep#*fvl};
+                        dep=${dep% *};
+                        dep=${dep%:*};
+                        dep="fvl${dep}";
+                        if [[ $dep != "" ]];then
+                              target="${target} \$(FVL_INC_PATH)/${dep}.o";
+                        fi;
+                  fi;
+            done;
+            target="${target} \$(FVL_LIB_PATH)/libfvl.a";
+            echo $target >> $makefile;
+            echo -e "\techo \"[FVL] Compiling file ${file_name}...\"" >> $makefile;
+            echo -e "\t\$(FVL_CMP) \$(FVL_SRC_FLAGS) -c \$(FVL_SOLVERS_PATH)/${file#$FVL_SOLVERS_PATH/} -o \$(FVL_INC_PATH)/${obj}" >> $makefile;
+            echo -e "\t\$(FVL_CMP) \$(FVL_SOLVERS_FLAGS) \$(FVL_INC_PATH)/${obj} -o \$(FVL_BIN_PATH)/${file_name%.*} \$(FVL_LIB_FLAGS)" >> $makefile;
+            echo "" >> $makefile;
+      done;
+      # write clean target
+      echo "clean:" >> $makefile;
+      echo -e "\t[[ -d \$(FVL_INC_PATH) ]] && rm -rf \$(FVL_INC_PATH)/*" >> $makefile;
+      echo -e "\t[[ -d \$(FVL_LIB_PATH) ]] && rm -rf \$(FVL_LIB_PATH)/*" >> $makefile;
+      echo -e "\t[[ -d \$(FVL_BIN_PATH) ]] && rm -rf \$(FVL_BIN_PATH)/*" >> $makefile;
+      echo ""  >> $makefile;
+}
+# create object file from specific source file
+function fvl_make_object {
+      # check argument
+      if [[ $1 == "" ]];then
+            echo "[FVL] ERROR: Missing input file!";
+            exit;
+      fi;
+      # check if file exists
+      if [[ ! -f $1 ]];then
+            echo "[FVL] ERROR: File $1 not found!";
+            exit;
+      fi;
+      printf "%s\n" "[FVL] Compiling file $1...";
+      $FVL_CMP $FVL_SRC_FLAGS -c $1 -o $(basename ${1%.*}.o);
+}
+# create executable from specific source file
+function fvl_make_executable {
+      # check argument
+      if [[ $1 == "" ]];then
+            echo "[FVL] ERROR: Missing input file!";
+            exit;
+      fi;
+      # check if file exists
+      if [[ ! -f $1 ]];then
+            echo "[FVL] ERROR: File $1 not found!";
+            exit;
+      fi;
+      printf "%s\n" "[FVL] Compiling file $1...";
+      $FVL_CMP $FVL_SRC_FLAGS -c $1 -o $(basename ${1%.*}.o);
+      $FVL_CMP $FVL_SOLVERS_FLAGS $(basename ${1%.*}.o) -o $(basename ${1%.*}) $FVL_LIB_FLAGS;
+}
+# clean objects and binaries
+function fvl_make_clean {
+      echo "[FVL] The following folders will be emptied:"
+      echo "[FVL]     $FVL_INC_PATH"
+      echo "[FVL]     $FVL_LIB_PATH"
+      echo "[FVL]     $FVL_BIN_PATH"
+      echo "[FVL] Do you wish to proceed?"
+      select yn in "Yes" "No";do
+            case $yn in
+                  Yes)
+                        # check if directory exists
+                        if [[ -d $FVL_INC_PATH ]];then
+                              rm -rf $FVL_INC_PATH/*;
+                        fi;
+                        # check if directory exists
+                        if [[ -d $FVL_LIB_PATH ]];then
+                              rm -rf $FVL_LIB_PATH/*;
+                        fi;
+                        # check if directory exists
+                        if [[ -d $FVL_BIN_PATH ]];then
+                              rm -rf $FVL_BIN_PATH/*;
+                        fi;
+                        break;
+                        ;;
+                  No)
+                        break;
+                        ;;
+            esac;
+      done;
+}
+#----------------------------------------------------------------------------------------
+# parse command
+#----------------------------------------------------------------------------------------
+# check if running as root
+# if [[ $EUID != 0 ]];then
+#       echo "[FVL] ERROR: You do not have enough permissions! Please run as root!";
+#       exit;
+# fi;
+# source compiler options
+if [[ ! -f $FVL_ETC_PATH/compiler.sh ]];then
+      echo "[FVL] ERROR: Compiler options file not found!";
+      exit;
+else
+      source $FVL_ETC_PATH/compiler.sh;
+fi;
+# source files options
+if [[ ! -f $FVL_ETC_PATH/files.sh ]];then
+      echo "[FVL] ERROR: Files options file not found!";
+      exit;
+else
+      source $FVL_ETC_PATH/files.sh;
+fi;
+# print welcome logo
+printf "[FVL]  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+[FVL] |  _ _ _   _   _   _      |                                   |
+[FVL] | |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+[FVL] | |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+[FVL] | |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+[FVL] | |_|       \_/   |_|_|_| |  Release: January, 2022           |
+[FVL] |_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+";
+# default variables
+FVL_BIN_PATH=$FVL_BIN_PATH_OPT;
+FVL_INC_PATH=$FVL_INC_PATH_OPT;
+FVL_LIB_PATH=$FVL_LIB_PATH_OPT;
+FVL_SRC_FLAGS="
+      $FVL_LANG_FLAGS_OPT
+      $FVL_PREPROC_FLAGS_OPT
+      $FVL_WARN_FLAGS_OPT
+      $FVL_OPTIM_FLAGS_OPT
+      $FVL_DEBUG_FLAGS_OPT
+      $FVL_DIR_FLAGS_OPT
+      $FVL_LIB_FLAGS_OPT
+      $FVL_DEF_FLAGS_OPT
+      ";
+FVL_TOOLS_FLAGS="
+      $FVL_LANG_FLAGS_OPT
+      $FVL_PREPROC_FLAGS_OPT
+      $FVL_WARN_FLAGS_OPT
+      $FVL_OPTIM_FLAGS_OPT
+      $FVL_DEBUG_FLAGS_OPT
+      $FVL_DIR_FLAGS_OPT
+      $FVL_DEF_FLAGS_OPT
+      ";
+FVL_SOLVERS_FLAGS="
+      $FVL_LANG_FLAGS_OPT
+      $FVL_PREPROC_FLAGS_OPT
+      $FVL_WARN_FLAGS_OPT
+      $FVL_OPTIM_FLAGS_OPT
+      $FVL_DEBUG_FLAGS_OPT
+      $FVL_DIR_FLAGS_OPT
+      $FVL_DEF_FLAGS_OPT
+      ";
+FVL_LIB_FLAGS=$FVL_LIB_FLAGS_OPT;
+# check options
+while [[ $1 != "" ]];do
+      case $1 in
+            -h|--help)
+                  fvl_make_help;
+                  echo "[FVL] Done --help!";
+                  shift;
+                  ;;
+            -v|--version)
+                  echo "[FVL] FVL library version: $FVL_VERSION";
+                  echo "[FVL] Done --version!";
+                  shift;
+                  ;;
+            -a|--all)
+                  fvl_make_update;
+                  fvl_make_library;
+                  fvl_make_tools;
+                  fvl_make_solvers;
+                  echo "[FVL] Done --all!";
+                  shift;
+                  ;;
+            -l|--library)
+                  fvl_make_update;
+                  fvl_make_library;
+                  echo "[FVL] Done --library!";
+                  shift;
+                  ;;
+            -t|--tools)
+                  fvl_make_update;
+                  fvl_make_tools;
+                  echo "[FVL] Done --tools!";
+                  shift;
+                  ;;
+            -s|--solvers)
+                  fvl_make_update;
+                  fvl_make_solvers;
+                  echo "[FVL] Done --solvers!";
+                  shift;
+                  ;;
+            -u|--update)
+                  fvl_make_update;
+                  echo "[FVL] Done --update!";
+                  shift;
+                  ;;
+            -m|--make)
+                  fvl_make_make;
+                  echo "[FVL] Done --make!";
+                  shift;
+                  ;;
+            -o|--object)
+                  fvl_make_object $2;
+                  echo "[FVL] Done --object!";
+                  shift;
+                  shift;
+                  ;;
+            -e|--executable)
+                  fvl_make_executable $2;
+                  echo "[FVL] Done --executable!";
+                  shift;
+                  shift;
+                  ;;
+            -p|--production)
+                  FVL_BIN_PATH=$FVL_BIN_PATH_OPT;
+                  FVL_INC_PATH=$FVL_INC_PATH_OPT;
+                  FVL_LIB_PATH=$FVL_LIB_PATH_OPT;
+                  FVL_SRC_FLAGS="
+                        $FVL_LANG_FLAGS_OPT
+                        $FVL_PREPROC_FLAGS_OPT
+                        $FVL_WARN_FLAGS_OPT
+                        $FVL_OPTIM_FLAGS_OPT
+                        $FVL_DEBUG_FLAGS_OPT
+                        $FVL_DIR_FLAGS_OPT
+                        $FVL_LIB_FLAGS_OPT
+                        $FVL_DEF_FLAGS_OPT
+                        ";
+                  FVL_TOOLS_FLAGS="
+                        $FVL_LANG_FLAGS_OPT
+                        $FVL_PREPROC_FLAGS_OPT
+                        $FVL_WARN_FLAGS_OPT
+                        $FVL_OPTIM_FLAGS_OPT
+                        $FVL_DEBUG_FLAGS_OPT
+                        $FVL_DIR_FLAGS_OPT
+                        $FVL_DEF_FLAGS_OPT
+                        ";
+                  FVL_SOLVERS_FLAGS="
+                        $FVL_LANG_FLAGS_OPT
+                        $FVL_PREPROC_FLAGS_OPT
+                        $FVL_WARN_FLAGS_OPT
+                        $FVL_OPTIM_FLAGS_OPT
+                        $FVL_DEBUG_FLAGS_OPT
+                        $FVL_DIR_FLAGS_OPT
+                        $FVL_DEF_FLAGS_OPT
+                        ";
+                  FVL_LIB_FLAGS=$FVL_LIB_FLAGS_OPT;
+                  echo "[FVL] Done --production!";
+                  shift;
+                  ;;
+            -d|--debugging)
+                  FVL_BIN_PATH=$FVL_BIN_PATH_DBG;
+                  FVL_INC_PATH=$FVL_INC_PATH_DBG;
+                  FVL_LIB_PATH=$FVL_LIB_PATH_DBG;
+                  FVL_SRC_FLAGS="
+                        $FVL_LANG_FLAGS_DBG
+                        $FVL_PREPROC_FLAGS_DBG
+                        $FVL_WARN_FLAGS_DBG
+                        $FVL_OPTIM_FLAGS_DBG
+                        $FVL_DEBUG_FLAGS_DBG
+                        $FVL_DIR_FLAGS_DBG
+                        $FVL_LIB_FLAGS_DBG
+                        $FVL_DEF_FLAGS_DBG
+                        ";
+                  FVL_TOOLS_FLAGS="
+                        $FVL_LANG_FLAGS_DBG
+                        $FVL_PREPROC_FLAGS_DBG
+                        $FVL_WARN_FLAGS_DBG
+                        $FVL_OPTIM_FLAGS_DBG
+                        $FVL_DEBUG_FLAGS_DBG
+                        $FVL_DIR_FLAGS_DBG
+                        $FVL_DEF_FLAGS_DBG
+                        ";
+                  FVL_SOLVERS_FLAGS="
+                        $FVL_LANG_FLAGS_DBG
+                        $FVL_PREPROC_FLAGS_DBG
+                        $FVL_WARN_FLAGS_DBG
+                        $FVL_OPTIM_FLAGS_DBG
+                        $FVL_DEBUG_FLAGS_DBG
+                        $FVL_DIR_FLAGS_DBG
+                        $FVL_DEF_FLAGS_DBG
+                        ";
+                  FVL_LIB_FLAGS=$FVL_LIB_FLAGS_DBG;
+                  echo "[FVL] Done --debugging!";
+                  shift;
+                  ;;
+            -r|--profiling)
+                  FVL_BIN_PATH=$FVL_BIN_PATH_PRF;
+                  FVL_INC_PATH=$FVL_INC_PATH_PRF;
+                  FVL_LIB_PATH=$FVL_LIB_PATH_PRF;
+                  FVL_SRC_FLAGS="
+                        $FVL_LANG_FLAGS_PRF
+                        $FVL_PREPROC_FLAGS_PRF
+                        $FVL_WARN_FLAGS_PRF
+                        $FVL_OPTIM_FLAGS_PRF
+                        $FVL_DEBUG_FLAGS_PRF
+                        $FVL_DIR_FLAGS_PRF
+                        $FVL_LIB_FLAGS_PRF
+                        $FVL_DEF_FLAGS_PRF
+                        ";
+                  FVL_TOOLS_FLAGS="
+                        $FVL_LANG_FLAGS_PRF
+                        $FVL_PREPROC_FLAGS_PRF
+                        $FVL_WARN_FLAGS_PRF
+                        $FVL_OPTIM_FLAGS_PRF
+                        $FVL_DEBUG_FLAGS_PRF
+                        $FVL_DIR_FLAGS_PRF
+                        $FVL_DEF_FLAGS_PRF
+                        ";
+                  FVL_SOLVERS_FLAGS="
+                        $FVL_LANG_FLAGS_PRF
+                        $FVL_PREPROC_FLAGS_PRF
+                        $FVL_WARN_FLAGS_PRF
+                        $FVL_OPTIM_FLAGS_PRF
+                        $FVL_DEBUG_FLAGS_PRF
+                        $FVL_DIR_FLAGS_PRF
+                        $FVL_DEF_FLAGS_PRF
+                        ";
+                  FVL_LIB_FLAGS=$FVL_LIB_FLAGS_PRF;
+                  echo "[FVL] Done --profiling!";
+                  shift;
+                  ;;
+            -c|--clean)
+                  fvl_make_clean;
+                  echo "[FVL] Done --clean!";
+                  shift;
+                  ;;
+            -x|--trace)
+                  set -o xtrace;
+                  echo "[FVL] Done --trace!";
+                  shift;
+                  ;;
+            *)
+                  echo "[FVL] ERROR: Invalid option! Try 'fvl-make -h' for usage.";
+                  exit;
+                  ;;
+      esac;
+done;
+#----------------------------------------------------------------------------------------
+# end of file
+#----------------------------------------------------------------------------------------

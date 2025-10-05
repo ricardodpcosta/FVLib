@@ -1,0 +1,309 @@
+# _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+#|  _ _ _   _   _   _      |                                   |
+#| |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+#| |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+#| |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+#| |_|       \_/   |_|_|_| |  Release: June 2021               |
+#|_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+# About: configuration file for fvl-make
+# Modification: January, 2025
+# compiler command
+FVL_CMP="frt";
+# create archive command
+FVL_AR="ar";
+# --plugin=/opt/FJSVxos/devkit/aarch64/libexec/gcc/aarch64-linux-gnu/8/liblto_plugin.so";
+# update archive command
+FVL_RANLIB="ranlib";
+# --plugin=/opt/FJSVxos/devkit/aarch64/libexec/gcc/aarch64-linux-gnu/8/liblto_plugin.so";
+# openmp compatibility
+FVL_OMP_VERSION="5";
+# openmp simd directives
+FVL_OMP_SIMD="0";
+# gnu instrinsics compatibility
+FVL_GNU_INTRINSICS="0";
+# gnu directives compatibility
+FVL_GNU_DIRECTIVES="0";
+# gnu instrinsics compatibility
+FVL_INTEL_INTRINSICS="0";
+# gnu directives compatibility
+FVL_INTEL_DIRECTIVES="0";
+# fuji instrinsics compatibility
+FVL_FUJI_INTRINSICS="1";
+# fuji directives compatibility
+FVL_FUJI_DIRECTIVES="1";
+# arm instrinsics compatibility
+FVL_ARM_INTRINSICS="0";
+# arm directives compatibility
+FVL_ARM_DIRECTIVES="0";
+# production mode
+FVL_LANG_FLAGS_OPT="
+      -X08
+      -Free
+      ";
+FVL_PREPROC_FLAGS_OPT="
+      -Cpp
+      -CcdRR8
+      -Nalloc_assign
+      -Nlibomp
+      -Kopenmp
+      -Kopenmp_simd
+      ";
+FVL_WARN_FLAGS_OPT="
+      -fi
+      ";
+FVL_OPTIM_FLAGS_OPT="
+      -KA64FX
+      -march=armv8.3-a+sve
+      -mtune=a64fx
+      -mcpu=a64fx
+      -O3
+      -Keval
+      -Kfp_contract
+      -Kfp_relaxed
+      -Kfz
+      -Kilfunc
+      -Kmfunc
+      -Komitfp
+      -Kfsimple
+      -Ksimd=2
+      -Ksimd_packed_promotion
+      -Ksimd_reduction_product
+      -Ksimd_reg_size=512
+      -Ksimd_uncounted_loop
+      -Ksimd_use_multiple_structures
+      -Kocl
+      -Klto
+      -Kzfill
+      -x-
+      ";
+      #-Kstatic_fjlib
+FVL_DEBUG_FLAGS_OPT="
+      -g0
+      -Nnocheck_global
+      -Nquickdbg=noargchk
+      -Nquickdbg=nosubchk
+      -Nquickdbg=noundef
+      -Nquickdbg=inf_simple
+      ";
+FVL_DIR_FLAGS_OPT="
+      -I./
+      -I$FVL_INC_PATH_OPT
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -M$FVL_INC_PATH_OPT
+      ";
+FVL_LIB_FLAGS_OPT="
+      -L$FVL_LIB_PATH_OPT
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_OPT="
+      -Dfvlmpi=1
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=0
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# debuggging mode
+FVL_LANG_FLAGS_DBG="
+      -X08
+      -Free
+      ";
+FVL_PREPROC_FLAGS_DBG="
+      -Cpp
+      -CcdRR8
+      -Nalloc_assign
+      -Nlibomp
+      -Kopenmp
+      -Kopenmp_simd
+      ";
+FVL_WARN_FLAGS_DBG="
+      -fi
+      ";
+FVL_OPTIM_FLAGS_DBG="
+      -KA64FX
+      -march=armv8.3-a+sve
+      -mtune=a64fx
+      -mcpu=a64fx
+      -O0
+      -Knoeval
+      -Knofp_contract
+      -Knofp_relaxed
+      -Knofz
+      -Knoilfunc
+      -Knomfunc
+      -Knoomitfp
+      -Knofsimple
+      -Knosimd
+      -Ksimd_nopacked_promotion
+      -Ksimd_noreduction_product
+      -Ksimd_reg_size=512
+      -Ksimd_nouncounted_loop
+      -Ksimd_nouse_multiple_structures
+      -Knoocl
+      -Knolto
+      -Knozfill
+      -x0
+      ";
+      #-Kstatic_fjlib
+FVL_DEBUG_FLAGS_DBG="
+      -g
+      -Ncheck_global
+      -Nquickdbg=argchk
+      -Nquickdbg=subchk
+      -Nquickdbg=undefnan
+      -Nquickdbg=inf_detail
+      ";
+FVL_DIR_FLAGS_DBG="
+      -I./
+      -I$FVL_INC_PATH_DBG
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -M$FVL_INC_PATH_DBG
+      ";
+FVL_LIB_FLAGS_DBG="
+      -L$FVL_LIB_PATH_DBG
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_DBG="
+      -Dfvlmpi=1
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=1
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# profiling mode
+FVL_LANG_FLAGS_PRF="
+      -X08
+      -Free
+      ";
+FVL_PREPROC_FLAGS_PRF="
+      -Cpp
+      -CcdRR8
+      -Nalloc_assign
+      -Nlibomp
+      -Kopenmp
+      -Kopenmp_simd
+      -Koptmsg=guide
+      ";
+FVL_WARN_FLAGS_PRF="
+      -fi
+      ";
+FVL_OPTIM_FLAGS_PRF="
+      -KA64FX
+      -march=armv8.3-a+sve
+      -mtune=a64fx
+      -mcpu=a64fx
+      -O2
+      -Keval
+      -Kfp_contract
+      -Kfp_relaxed
+      -Kfz
+      -Kilfunc
+      -Kmfunc
+      -Komitfp
+      -Kfsimple
+      -Ksimd=2
+      -Ksimd_packed_promotion
+      -Ksimd_reduction_product
+      -Ksimd_reg_size=512
+      -Ksimd_uncounted_loop
+      -Ksimd_use_multiple_structures
+      -Kocl
+      -Klto
+      -Kzfill
+      -x-
+      ";
+      #-Kstatic_fjlib
+FVL_DEBUG_FLAGS_PRF="
+      -g0
+      -Nnocheck_global
+      -Nquickdbg=noargchk
+      -Nquickdbg=nosubchk
+      -Nquickdbg=noundef
+      -Nquickdbg=inf_simple
+      ";
+FVL_DIR_FLAGS_PRF="
+      -I./
+      -I$FVL_INC_PATH_PRF
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -M$FVL_INC_PATH_PRF
+      ";
+FVL_LIB_FLAGS_PRF="
+      -L$FVL_LIB_PATH_PRF
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_PRF="
+      -Dfvlmpi=1
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=0
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# end of file

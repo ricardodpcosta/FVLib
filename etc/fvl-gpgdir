@@ -1,0 +1,31 @@
+# _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+#|  _ _ _   _   _   _      |                                   |
+#| |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+#| |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+#| |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+#| |_|       \_/   |_|_|_| |  Release: June 2021               |
+#|_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+# About: library encryption commands
+# Modification: August, 2021
+# gpg a directory recursivelly
+function gpgdir_make {
+      cd $1;
+      for file in $(ls);do
+            if [[ -f $file ]];then
+                  gpg --passphrase $gpgdir_pass -c $file;
+                  rm $file;
+            else
+                  gpgdir_make $file;
+            fi;
+      done;
+      cd -;
+}
+# arguments
+gpgdir_from=$1;
+gpgdir_to=$2;
+gpgdir_pass=$3;
+# copy folder
+cp -rp $gpgdir_from $gpgdir_to;
+# encrypt
+gpgdir_make $gpgdir_to;
+# end of file

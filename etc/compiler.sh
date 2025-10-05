@@ -1,0 +1,333 @@
+# _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+#|  _ _ _   _   _   _      |                                   |
+#| |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+#| |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+#| |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+#| |_|       \_/   |_|_|_| |  Release: June 2021               |
+#|_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+# About: configuration file for fvl-make
+# Modification: January, 2025
+# compiler command
+FVL_CMP="gfortran-6";
+# create archive command
+FVL_AR="ar";
+# update archive command
+FVL_RANLIB="ranlib";
+# openmp compatibility
+FVL_OMP_VERSION="5";
+# openmp simd directives
+FVL_OMP_SIMD="0";
+# gnu instrinsics compatibility
+FVL_GNU_INTRINSICS="1";
+# gnu directives compatibility
+FVL_GNU_DIRECTIVES="0";
+# gnu instrinsics compatibility
+FVL_INTEL_INTRINSICS="0";
+# gnu directives compatibility
+FVL_INTEL_DIRECTIVES="0";
+# fuji instrinsics compatibility
+FVL_FUJI_INTRINSICS="0";
+# fuji directives compatibility
+FVL_FUJI_DIRECTIVES="0";
+# arm instrinsics compatibility
+FVL_ARM_INTRINSICS="0";
+# arm directives compatibility
+FVL_ARM_DIRECTIVES="0";
+# production mode
+FVL_LANG_FLAGS_OPT="
+      -std=f2008
+      -ffree-form
+      -ffree-line-length-none
+      -fimplicit-none
+      -fall-intrinsics
+      ";
+FVL_PREPROC_FLAGS_OPT="
+      -cpp
+      -fdefault-real-8
+      -fdefault-double-8
+      -fopenmp
+      -fopenmp-simd
+      ";
+FVL_WARN_FLAGS_OPT="
+      -Wall
+      -Wcharacter-truncation
+      -Wconversion-extra
+      -Wextra
+      -Wunused-parameter
+      -Wimplicit-interface
+      -Wimplicit-procedure
+      -Wunderflow
+      -Warray-bounds
+      -Wmaybe-uninitialized
+      -Wno-array-temporaries
+      -Wno-unused-function
+      ";
+FVL_OPTIM_FLAGS_OPT="
+      -march=native
+      -mtune=native
+      -mfpmath=sse
+      -O3
+      -ftree-vectorize
+      -malign-double
+      -fno-signed-zeros
+      -funroll-loops
+      -finline
+      -finline-functions
+      -finline-small-functions
+      -findirect-inlining
+      -fearly-inlining
+      -finline-functions-called-once
+      -finline-limit=1000
+      -fwhole-program
+      -flto
+      ";
+      #-static-libgfortran
+      #-static-libgcc
+      #-static
+FVL_DEBUG_FLAGS_OPT="
+      -g0
+      -fcheck=
+      -fno-backtrace
+      -fno-trapping-math
+      -ffpe-trap=
+      ";
+FVL_DIR_FLAGS_OPT="
+      -I./
+      -I$FVL_INC_PATH_OPT
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -J$FVL_INC_PATH_OPT
+      ";
+FVL_LIB_FLAGS_OPT="
+      -L$FVL_LIB_PATH_OPT
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_OPT="
+      -Dfvlmpi=0
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=0
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# debuggging mode
+FVL_LANG_FLAGS_DBG="
+      -std=f2008
+      -ffree-form
+      -ffree-line-length-none
+      -fimplicit-none
+      -fall-intrinsics
+      ";
+FVL_PREPROC_FLAGS_DBG="
+      -cpp
+      -fdefault-real-8
+      -fdefault-double-8
+      -fopenmp
+      -fopenmp-simd
+      ";
+FVL_WARN_FLAGS_DBG="
+      -Wall
+      -Wcharacter-truncation
+      -Wconversion-extra
+      -Wextra
+      -Wunused-parameter
+      -Wimplicit-interface
+      -Wimplicit-procedure
+      -Wunderflow
+      -Warray-bounds
+      -Wmaybe-uninitialized
+      -Wno-array-temporaries
+      -Wno-unused-function
+      ";
+FVL_OPTIM_FLAGS_DBG="
+      -march=native
+      -mtune=native
+      -mfpmath=sse
+      -O0
+      -fno-tree-vectorize
+      -mno-align-double
+      -fno-signed-zeros
+      -fno-unroll-loops
+      -fno-inline
+      -fno-inline-functions
+      -fno-inline-small-functions
+      -fno-indirect-inlining
+      -fno-early-inlining
+      -fno-inline-functions-called-once
+      -finline-limit=1000
+      -fno-whole-program
+      -fno-lto
+      ";
+      #-static-libgfortran
+      #-static-libgcc
+      #-static
+FVL_DEBUG_FLAGS_DBG="
+      -g
+      -fcheck=all
+      -fbacktrace
+      -ftrapping-math
+      -ffpe-trap=invalid,zero,overflow,underflow,denormal
+      ";
+      #,underflow,denormal
+FVL_DIR_FLAGS_DBG="
+      -I./
+      -I$FVL_INC_PATH_DBG
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -J$FVL_INC_PATH_DBG
+      ";
+FVL_LIB_FLAGS_DBG="
+      -L$FVL_LIB_PATH_DBG
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_DBG="
+      -Dfvlmpi=0
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=1
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# profiling mode
+FVL_LANG_FLAGS_PRF="
+      -std=f2008
+      -ffree-form
+      -ffree-line-length-none
+      -fimplicit-none
+      -fall-intrinsics
+      ";
+FVL_PREPROC_FLAGS_PRF="
+      -cpp
+      -fdefault-real-8
+      -fdefault-double-8
+      -fopenmp
+      -fopenmp-simd
+      -pg
+      -fopt-info-all-optall
+      ";
+FVL_WARN_FLAGS_PRF="
+      -Wall
+      -Wcharacter-truncation
+      -Wconversion-extra
+      -Wextra
+      -Wunused-parameter
+      -Wimplicit-interface
+      -Wimplicit-procedure
+      -Wunderflow
+      -Warray-bounds
+      -Wmaybe-uninitialized
+      -Wno-array-temporaries
+      -Wno-unused-function
+      ";
+FVL_OPTIM_FLAGS_PRF="
+      -march=native
+      -mtune=native
+      -mfpmath=sse
+      -O2
+      -ftree-vectorize
+      -malign-double
+      -fno-signed-zeros
+      -funroll-loops
+      -finline
+      -finline-functions
+      -finline-small-functions
+      -findirect-inlining
+      -fearly-inlining
+      -finline-functions-called-once
+      -finline-limit=1000
+      -fwhole-program
+      -flto
+      ";
+      #-static-libgfortran
+      #-static-libgcc
+      #-static
+FVL_DEBUG_FLAGS_PRF="
+      -g0
+      -fcheck=
+      -fno-backtrace
+      -fno-trapping-math
+      -ffpe-trap=
+      ";
+FVL_DIR_FLAGS_PRF="
+      -I./
+      -I$FVL_INC_PATH_PRF
+      -I$FVL_SRC_PATH/includes
+      -I$FVL_APPS_PATH/includes
+      -J$FVL_INC_PATH_PRF
+      ";
+FVL_LIB_FLAGS_PRF="
+      -L$FVL_LIB_PATH_PRF
+      -lfvl
+      -lm
+      ";
+FVL_DEF_FLAGS_PRF="
+      -Dfvlmpi=0
+      -Dfvlcharacterlen=250
+      -Dfvlshortkind=2
+      -Dfvlintegerkind=4
+      -Dfvlfloatkind=4
+      -Dfvlrealkind=8
+      -Dfvlquadkind=16
+      -Dfvlcomplexkind=8
+      -Dfvllogicalkind=4
+      -Dfvlfloatprecision=1.0d-25
+      -Dfvlrealprecision=1.0d-250
+      -Dfvlquadprecision=1.0d-250
+      -Dfvlalignbytes=8
+      -Dfvldebug=0
+      -Dfvlverbose=2
+      -Dfvlmaxnumprocesses=100
+      -Dfvlmaxnumthreads=100
+      -Dfvlstacksize=1024000
+      -Dfvlompversion=$FVL_OMP_VERSION
+      -Dfvlompsimd=$FVL_OMP_SIMD
+      -Dfvlgnuintrinsics=$FVL_GNU_INTRINSICS
+      -Dfvlgnudirectives=$FVL_GNU_DIRECTIVES
+      -Dfvlintelintrinsics=$FVL_INTEL_INTRINSICS
+      -Dfvlinteldirectives=$FVL_INTEL_DIRECTIVES
+      -Dfvlfujiintrinsics=$FVL_FUJI_INTRINSICS
+      -Dfvlfujidirectives=$FVL_FUJI_DIRECTIVES
+      ";
+# end of file

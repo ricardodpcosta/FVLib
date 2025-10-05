@@ -1,0 +1,145 @@
+#!/bin/bash
+# _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+#|  _ _ _   _   _   _      |                                   |
+#| |_|_|_| |_| |_| |_|     |  The Great Finite Volume Library  |
+#| |_|_    |_|_|_| |_|     |  Author: Ricardo Costa            |
+#| |_|_|    \_\_/  |_|_ _  |  Version: 1.0                     |
+#| |_|       \_/   |_|_|_| |  Release: January, 2022           |
+#|_ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+# About: auto-configuration utility
+# Modification: January, 2022
+#----------------------------------------------------------------------------------------
+# functions
+#----------------------------------------------------------------------------------------
+# display the help message
+function autoconfig_help {
+      printf "%s" "[FVL] About: auto-configuration utility.
+[FVL] Usage: autoconfig [options]
+[FVL] Options:
+[FVL]        -h|--help         < >               Display the help message.
+[FVL]        -c|--check        < >               Check dependencies.
+[FVL]        -p|--production   < >               Enable production mode (default).
+[FVL]        -d|--debugging    < >               Enable debugging mode.
+[FVL]        -r|--profiling    < >               Enable profiling mode.
+[FVL]        -i|--install      < >               Install library and applications (default).
+[FVL]        -x|--trace        < >               Trace executed commands.
+";
+}
+# check dependencies
+function autoconfig_check {
+      # check gfortran
+      if command -v gfortran &> /dev/null;then
+            echo "[FVL] Find gfortran: OK";
+            autoconfig_gfortran=1;
+      else
+            echo "[FVL] Find gfortran: FAILED";
+            autoconfig_gfortran=0;
+      fi;
+      # check make
+      if command -v make &> /dev/null;then
+            echo "[FVL] Find make: OK";
+            autoconfig_make=1;
+      else
+            echo "[FVL] Find make: FAILED";
+            autoconfig_make=0;
+      fi;
+      # check arquitecture
+      autoconfig_arch=$(uname -m);
+      if [[ $autoconfig_arch == *"x86_64"* ]];then
+            echo "[FVL] Machine hardware: x86_64";
+      elif [[ $autoconfig_arch == *"aarch64"* ]];then
+            echo "[FVL] Machine hardware: aarch64";
+      else
+            echo "[FVL] Machine hardware: unknown";
+      fi;
+}
+# check dependencies
+function autoconfig_install {
+      # absolute path to sourced script
+      export autoconfig_path=$(cd $(dirname "${BASH_SOURCE}");pwd);
+      # absolute path to installation
+      export autoconfig_prefix=$(dirname "$autoconfig_path");
+      # change directory
+      cd $autoconfig_prefix;
+      # check dependencies
+      if [[ $autoconfig_gfortran == "0" ]];then
+            echo "[FVL] ERROR: Cannot install due to missing dependencies."
+            exit;
+      fi;
+      if [[ $autoconfig_make == "0" ]];then
+            echo "[FVL] ERROR: Cannot install due to missing dependencies."
+            exit;
+      fi;
+      # check arquitecture
+      if [[ $autoconfig_arch == *"x86_64"* ]];then
+            cp etc/gcc-x86_64.sh etc/compiler.sh;
+      elif [[ $autoconfig_arch == *"aarch64"* ]];then
+            cp etc/gcc-aarch64.sh etc/compiler.sh;
+      else
+            echo "[FVL] ERROR: Cannot install due to unknown machine hardware."
+            exit;
+      fi;
+      # source configurations
+      source etc/bashrc.sh;
+      # create makefile
+      fvl-make $autoconfig_mode --make;
+      # change directory
+      cd build;
+      # install library and applications
+      make all -s -j;
+      # create alias
+      autoconfig_alias=$(basename $autoconfig_prefix);
+      if [[ -f ~/.bashrc ]];then
+            echo "alias $autoconfig_alias='source ${autoconfig_prefix}/etc/bashrc.sh'" >> ~/.bashrc;
+      elif [[ -f ~/.profile ]];then
+            echo "alias $autoconfig_alias='source ${autoconfig_prefix}/etc/bashrc.sh'" >> ~/.profile;
+      fi;
+}
+# check options
+while [[ $1 != "" ]];do
+      case $1 in
+            -h|--help)
+                  autoconfig_help;
+                  echo "[FVL] Done --help!";
+                  shift;
+                  ;;
+            -c|--check)
+                  autoconfig_check;
+                  echo "[FVL] Done --check!";
+                  shift;
+                  ;;
+            -p|--production)
+                  autoconfig_mode="--production";
+                  echo "[FVL] Done --production!";
+                  shift;
+                  ;;
+            -d|--debugging)
+                  autoconfig_mode="--debugging";
+                  echo "[FVL] Done --debugging!";
+                  shift;
+                  ;;
+            -r|--profiling)
+                  autoconfig_mode="--profiling";
+                  echo "[FVL] Done --profiling!";
+                  shift;
+                  ;;
+            -i|--install)
+                  autoconfig_check;
+                  autoconfig_install;
+                  echo "[FVL] Done --install!";
+                  shift;
+                  ;;
+            -x|--trace)
+                  set -o xtrace;
+                  echo "[FVL] Done --trace!";
+                  shift;
+                  ;;
+            *)
+                  echo "[FVL] ERROR: Invalid option! Try 'autoconfig -h' for usage.";
+                  exit;
+                  ;;
+      esac;
+done;
+#----------------------------------------------------------------------------------------
+# end of file
+#----------------------------------------------------------------------------------------
