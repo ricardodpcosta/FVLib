@@ -1,10 +1,10 @@
 # FVLib
 
-**The Great Finite Volume Library.**
+**A Fortran library of advanced computational algorithms and numerical methods to solve partial differential equations within the finite volume philosophy.**
 
 ## Description
 
-The FVLib code is a library of advanced computational algorithms and numerical methods to solve partial differential equations (PDEs) within the finite volume philosophy. The project aims to bring high-fidelity and high-performance simulations of a wide range of physics and engineering problems in relevant industrial, environmental, and biomedical applications. In that regard, the development of the FVLib code is based on the following principles:
+The project aims to bring high-fidelity and high-performance simulations of a wide range of physics and engineering problems in relevant industrial, environmental, and biomedical applications. In that regard, the development of the FVLib code is based on the following principles:
 
 - *Modern object-oriented Fortran (2003/2008 standards)* - for better code reuse and organisation
 - *High-scalability with multi-threading execution* - to take advantage of modern HPC systems
