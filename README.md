@@ -2,6 +2,8 @@
 
 **A Fortran library of advanced computational algorithms and numerical methods to solve partial differential equations within the finite volume philosophy.**
 
+---
+
 ## Description
 
 The project aims to bring high-fidelity and high-performance simulations of a wide range of physics and engineering problems in relevant industrial, environmental, and biomedical applications. In that regard, the development of the FVLib code is based on the following principles:
@@ -16,6 +18,8 @@ Currently, the following problems can be solved in the FVLib code:
 - Convection-diffusion problems for heat and species transfer
 - Conjugate heat transfer with solid/solid and solid/fluid interfaces
 - Incompressible (non-)isothermal (non-)Newtonian fluid flows with the Euler/Stokes/Oseen/Navier-Stokes equations
+
+---
 
 ## Building
 
@@ -170,6 +174,8 @@ make all -s -j
 cd ..
 echo "alias fvlib-release-dbg='source $(pwd)/etc/bashrc.sh' >> ~/.bashrc"
 ```
+
+---
 
 ## Third-party software
 
