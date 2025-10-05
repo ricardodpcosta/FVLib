@@ -1,6 +1,6 @@
 # FVLib
 
-The Great Finite Volume Library release version.
+The Great Finite Volume Library.
 
 ## Description
 
