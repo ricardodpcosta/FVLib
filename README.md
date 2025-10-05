@@ -1,4 +1,4 @@
-# FVLib-Release
+# FVLib
 
 The Great Finite Volume Library release version.
 
