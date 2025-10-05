@@ -1,6 +1,6 @@
 # FVLib
 
-The Great Finite Volume Library.
+**The Great Finite Volume Library.**
 
 ## Description
 
@@ -181,3 +181,23 @@ gmsh --version
 ```
 
 > **NOTE**: In Ubuntu and other APT-based Linux distributions, Gmsh can be easily installed with `sudo apt-get install gmsh`. For other distributions, follow the instructions provided on the [Gmsh](https://gmsh.info/#Download) webpage.
+
+---
+
+## Contributing
+
+Contributions are encouraged in all forms, including the addition of functionalities, refinement of source code, enhancement of documentation, and resolution of issues.
+For detailed guidelines, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## Contact
+
+📧 [Ricardo Costa](mailto:rcosta\@dep.uminho.pt)  
+🌐 [Academic page](https://ricardodpcosta.github.io/)
